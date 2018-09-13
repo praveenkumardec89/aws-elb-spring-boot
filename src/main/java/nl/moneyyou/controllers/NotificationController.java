@@ -1,5 +1,6 @@
 package nl.moneyyou.controllers;
 
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller to provide an API for the notifications.
@@ -55,9 +57,9 @@ public class NotificationController  {
     })
     @ResponseStatus(HttpStatus.FOUND)
     //Todo : hystrix config file
-   public List<MessageDetails> getMessages(@RequestBody MessageDetails messageDetails) {
+   public List<Map<String, AttributeValue>> getMessages(@RequestBody MessageDetails messageDetails) {
         LOGGER.info("Received request to get messages of {} ", messageDetails.getMobileNo());
-        return notificationService.getMessagesForRecipient();
+        return notificationService.getMessagesForRecipient(messageDetails.getMobileNo());
     }
 
 }

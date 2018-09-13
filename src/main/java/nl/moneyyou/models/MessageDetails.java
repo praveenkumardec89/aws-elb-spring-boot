@@ -1,6 +1,6 @@
 package nl.moneyyou.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,11 +12,10 @@ import lombok.experimental.Wither;
 @Wither
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamoDBTable(tableName = "DeliveredMessages")
 public class MessageDetails {
 
-    @JsonIgnore
     private String messageId;
-
     private String payload;
     private String mobileNo;
     private String email;

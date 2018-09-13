@@ -33,10 +33,8 @@ public class LamdaToUpdateDynamo implements RequestHandler<MessageDetails, Messa
         return this.dynamoDb.getTable(DYNAMODB_TABLE_NAME)
           .putItem(
             new PutItemSpec().withItem(new Item()
-              .withString("messageId", messageDetails.getMessageId())
               .withString("mobileNo", messageDetails.getMobileNo())
-              .withString("email", messageDetails.getEmail())
-                .withString("payload", messageDetails.getPayload())));
+              .withString("payload", messageDetails.getPayload())));
     }
  
     private void initDynamoDbClient() {
