@@ -1,0 +1,535 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "This Template creates an Amazon SNS topic that can send messages to two Amazon SQS queues with appropriate permissions for one IAM user to publish to the topic and another to read messages from the queues. MySNSTopic is set up to publish to two subscribed endpoints, which are two Amazon SQS queues (MyQueue1 and MyQueue2). MyPublishUser is an IAM user that can publish to MySNSTopic using the Publish API. MyTopicPolicy assigns that permission to MyPublishUser. MyQueueUser is an IAM user that can read messages from the two Amazon SQS queues. MyQueuePolicy assigns those permissions to MyQueueUser. It also assigns permission for MySNSTopic to publish its notifications to the two queues. The template creates access keys for the two IAM users with MyPublishUserKey and MyQueueUserKey.  Note that you will be billed for the AWS resources used if you create a stack from this template.",
+  "Parameters": {
+    "MyPublishUserPassword": {
+      "NoEcho": "true",
+      "Type": "String",
+      "Description": "Password for the IAM user MyPublishUser",
+      "MinLength": "1",
+      "MaxLength": "41",
+      "AllowedPattern": "[a-zA-Z0-9]*",
+      "ConstraintDescription": "must contain only alphanumeric characters."
+    },
+    "MyQueueUserPassword": {
+      "NoEcho": "true",
+      "Type": "String",
+      "Description": "Password for the IAM user MyQueueUser",
+      "MinLength": "1",
+      "MaxLength": "41",
+      "AllowedPattern": "[a-zA-Z0-9]*",
+      "ConstraintDescription": "must contain only alphanumeric characters."
+    }
+  },
+  "Resources": {
+    "MySNSTopic": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "Subscription": [
+          {
+            "Endpoint": {
+              "Fn::GetAtt": [
+                "test",
+                "Arn"
+              ]
+            },
+            "Protocol": "sqs"
+          },
+          {
+            "Endpoint": {
+              "Fn::GetAtt": [
+                "MyQueue2",
+                "Arn"
+              ]
+            },
+            "Protocol": "sqs"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "9dd9dacf-1af0-4fe6-892b-1aba87649318"
+        }
+      }
+    },
+    "test": {
+      "Type": "AWS::SQS::Queue",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "5f1886fb-772a-4a91-bd34-b8b0af961e86"
+        }
+      }
+    },
+    "MyQueue2": {
+      "Type": "AWS::SQS::Queue",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "3c36f329-a6b6-4dfd-8aab-0d1dd19e4f61"
+        }
+      }
+    },
+    "MyPublishUser": {
+      "Type": "AWS::IAM::User",
+      "Properties": {
+        "LoginProfile": {
+          "Password": {
+            "Ref": "MyPublishUserPassword"
+          }
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "a22eb99b-71f5-49e5-b84b-4d645effcc56"
+        }
+      }
+    },
+    "MyPublishUserKey": {
+      "Type": "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": {
+          "Ref": "MyPublishUser"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "9d44b38e-eba4-4aba-b157-a751adf56f91"
+        }
+      }
+    },
+    "MyPublishTopicGroup": {
+      "Type": "AWS::IAM::Group",
+      "Properties": {
+        "Policies": [
+          {
+            "PolicyName": "MyTopicGroupPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sns:Publish"
+                  ],
+                  "Resource": {
+                    "Ref": "MySNSTopic"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "ebc2636b-1d52-4570-8c6c-1ec73cd4abfe"
+        }
+      }
+    },
+    "AddUserToMyPublishTopicGroup": {
+      "Type": "AWS::IAM::UserToGroupAddition",
+      "Properties": {
+        "GroupName": {
+          "Ref": "MyPublishTopicGroup"
+        },
+        "Users": [
+          {
+            "Ref": "MyPublishUser"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "5061e848-5756-4fb8-95de-256dc99b8b42"
+        }
+      }
+    },
+    "MyQueueUser": {
+      "Type": "AWS::IAM::User",
+      "Properties": {
+        "LoginProfile": {
+          "Password": {
+            "Ref": "MyQueueUserPassword"
+          }
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "169f63c2-2105-4a66-8dda-3bb017f5fb0f"
+        }
+      }
+    },
+    "MyQueueUserKey": {
+      "Type": "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": {
+          "Ref": "MyQueueUser"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "ccf6f50b-9642-4027-be5f-3364bfc5e632"
+        }
+      }
+    },
+    "MyRDMessageQueueGroup": {
+      "Type": "AWS::IAM::Group",
+      "Properties": {
+        "Policies": [
+          {
+            "PolicyName": "MyQueueGroupPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:DeleteMessage",
+                    "sqs:ReceiveMessage"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "MyQueue1",
+                        "Arn"
+                      ]
+                    },
+                    {
+                      "Fn::GetAtt": [
+                        "MyQueue2",
+                        "Arn"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "c5b4f55f-8402-42b2-a723-7a68fb532d31"
+        }
+      }
+    },
+    "AddUserToMyQueueGroup": {
+      "Type": "AWS::IAM::UserToGroupAddition",
+      "Properties": {
+        "GroupName": {
+          "Ref": "MyRDMessageQueueGroup"
+        },
+        "Users": [
+          {
+            "Ref": "MyQueueUser"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "36d62841-729f-4e83-b71e-dc26f5f0bc3b"
+        }
+      }
+    },
+    "MyQueuePolicy": {
+      "Type": "AWS::SQS::QueuePolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Id": "MyQueuePolicy",
+          "Statement": [
+            {
+              "Sid": "Allow-SendMessage-To-Both-Queues-From-SNS-Topic",
+              "Effect": "Allow",
+              "Principal": "*",
+              "Action": [
+                "sqs:SendMessage"
+              ],
+              "Resource": "*",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Ref": "MySNSTopic"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Queues": [
+          {
+            "Ref": "MyQueue1"
+          },
+          {
+            "Ref": "MyQueue2"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "9d5545d6-56a4-4b13-b51d-4ed2533dddb6"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "MySNSTopicTopicARN": {
+      "Value": {
+        "Ref": "MySNSTopic"
+      }
+    },
+    "MyQueue1Info": {
+      "Value": {
+        "Fn::Join": [
+          " ",
+          [
+            "ARN:",
+            {
+              "Fn::GetAtt": [
+                "MyQueue1",
+                "Arn"
+              ]
+            },
+            "URL:",
+            {
+              "Ref": "MyQueue1"
+            }
+          ]
+        ]
+      }
+    },
+    "MyQueue2Info": {
+      "Value": {
+        "Fn::Join": [
+          " ",
+          [
+            "ARN:",
+            {
+              "Fn::GetAtt": [
+                "MyQueue2",
+                "Arn"
+              ]
+            },
+            "URL:",
+            {
+              "Ref": "MyQueue2"
+            }
+          ]
+        ]
+      }
+    },
+    "MyPublishUserInfo": {
+      "Value": {
+        "Fn::Join": [
+          " ",
+          [
+            "ARN:",
+            {
+              "Fn::GetAtt": [
+                "MyPublishUser",
+                "Arn"
+              ]
+            },
+            "Access Key:",
+            {
+              "Ref": "MyPublishUserKey"
+            },
+            "Secret Key:",
+            {
+              "Fn::GetAtt": [
+                "MyPublishUserKey",
+                "SecretAccessKey"
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "MyQueueUserInfo": {
+      "Value": {
+        "Fn::Join": [
+          " ",
+          [
+            "ARN:",
+            {
+              "Fn::GetAtt": [
+                "MyQueueUser",
+                "Arn"
+              ]
+            },
+            "Access Key:",
+            {
+              "Ref": "MyQueueUserKey"
+            },
+            "Secret Key:",
+            {
+              "Fn::GetAtt": [
+                "MyQueueUserKey",
+                "SecretAccessKey"
+              ]
+            }
+          ]
+        ]
+      }
+    }
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "169f63c2-2105-4a66-8dda-3bb017f5fb0f": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 60,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "ccf6f50b-9642-4027-be5f-3364bfc5e632": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 180,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "a22eb99b-71f5-49e5-b84b-4d645effcc56": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 60,
+          "y": 210
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "9d44b38e-eba4-4aba-b157-a751adf56f91": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 180,
+          "y": 210
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "3c36f329-a6b6-4dfd-8aab-0d1dd19e4f61": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 300,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "5f1886fb-772a-4a91-bd34-b8b0af961e86": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 300,
+          "y": 210
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "c5b4f55f-8402-42b2-a723-7a68fb532d31": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 60,
+          "y": 330
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "36d62841-729f-4e83-b71e-dc26f5f0bc3b": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 180,
+          "y": 330
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "169f63c2-2105-4a66-8dda-3bb017f5fb0f",
+          "c5b4f55f-8402-42b2-a723-7a68fb532d31"
+        ]
+      },
+      "9dd9dacf-1af0-4fe6-892b-1aba87649318": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 300,
+          "y": 330
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "9d5545d6-56a4-4b13-b51d-4ed2533dddb6": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 420,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "5f1886fb-772a-4a91-bd34-b8b0af961e86",
+          "3c36f329-a6b6-4dfd-8aab-0d1dd19e4f61"
+        ]
+      },
+      "ebc2636b-1d52-4570-8c6c-1ec73cd4abfe": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 420,
+          "y": 210
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "5061e848-5756-4fb8-95de-256dc99b8b42": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 420,
+          "y": 330
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "a22eb99b-71f5-49e5-b84b-4d645effcc56",
+          "ebc2636b-1d52-4570-8c6c-1ec73cd4abfe"
+        ]
+      }
+    }
+  }
+}

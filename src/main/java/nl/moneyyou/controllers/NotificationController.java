@@ -1,7 +1,5 @@
 package nl.moneyyou.controllers;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -38,7 +36,8 @@ public class NotificationController  {
             @ApiResponse(code = 400, message = "Invalid request")
     })
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE")})//, ignoreExceptions = {ResourceNotFoundException.class, ResourceGoneException.class})
+    //Todo : hystrix config file
+  //  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE")}, ignoreExceptions = {ResourceNotFoundException.class, ResourceGoneException.class})
     public String postMessage(@RequestBody MessageDetails messageDetails) {
         LOGGER.info("Received request to post a message to {} with payload {} ", messageDetails.getEmail(), messageDetails.getPayload());
           return notificationService.postMessage(messageDetails);

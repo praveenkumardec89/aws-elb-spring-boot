@@ -28,6 +28,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: "jacoco"
 apply plugin: 'java'
 
+
 group 'money-you'
 version '1.0-SNAPSHOT'
 
@@ -61,12 +62,17 @@ dependencies {
     compile ("org.springframework.boot:spring-boot-starter-web")
     compile ("org.springframework.boot:spring-boot-starter-amqp")
     compile ("org.springframework.boot:spring-boot-starter-cache")
-    compile ("com.netflix.hystrix:hystrix-javanica:${hystrixVersion}")
+    compile ("com.amazonaws:aws-java-sdk-core:1.11.109")
+    compile ("com.amazonaws:aws-java-sdk-sns:1.11.160")
+    compile ("com.amazonaws:aws-java-sdk-lambda:1.9.22")
+    compile ("com.amazonaws:aws-lambda-java-core:1.0.0")
+     compile ("com.netflix.hystrix:hystrix-javanica:${hystrixVersion}")
     compile ("com.netflix.hystrix:hystrix-metrics-event-stream:${hystrixVersion}")
     compileOnly ('javax.servlet:servlet-api:2.5')
     compile ("org.springframework.cloud:spring-cloud-starter-hystrix:1.0.3.RELEASE") {
         exclude group: "com.netflix.archaius"
     }
+
     compile ("com.netflix.archaius:archaius-core:0.7.1")
     compile "org.springframework.cloud:spring-cloud-context:1.1.8.RELEASE"
     compile "io.springfox:springfox-swagger2:${springfoxVersion}"
@@ -117,6 +123,23 @@ test {
         classifier = 'executable'
     }
 
+    jar {
+        manifest {
+            attributes "Main-Class": "nl.moneyyou.services.lamdaFunctionToSMS"
+        }
+
+        from {
+            configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        }
+    }
+    task customFatJar(type: Jar) {
+        manifest {
+            attributes 'Main-Class': 'nl.moneyyou.services.lamdaFunctionToSMS'
+        }
+        baseName = 'all-in-one-jar'
+        from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+        with jar
+    }
 
 
 
