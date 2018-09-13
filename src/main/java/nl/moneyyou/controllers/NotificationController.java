@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * Controller to provide an API for the notifications.
  */
@@ -41,6 +43,21 @@ public class NotificationController  {
     public String postMessage(@RequestBody MessageDetails messageDetails) {
         LOGGER.info("Received request to post a message to {} with payload {} ", messageDetails.getEmail(), messageDetails.getPayload());
           return notificationService.postMessage(messageDetails);
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    @ApiOperation(
+            value = "get messages of a recipient",
+            notes = "provide a valid email address.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "details recived"),
+            @ApiResponse(code = 400, message = "Invalid request")
+    })
+    @ResponseStatus(HttpStatus.FOUND)
+    //Todo : hystrix config file
+   public List<MessageDetails> getMessages(@RequestBody MessageDetails messageDetails) {
+        LOGGER.info("Received request to get messages of {} ", messageDetails.getEmail());
+        return notificationService.getMessagesForRecipient();
     }
 
 }
