@@ -32,7 +32,7 @@ public class NotificationController  {
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation(
             value = "Post a message to a recipient",
-            notes = "provide a valid email address.")
+            notes = "provide a valid mobileNo address.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Message posted"),
             @ApiResponse(code = 400, message = "Invalid request")
@@ -41,14 +41,14 @@ public class NotificationController  {
     //Todo : hystrix config file
   //  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE")}, ignoreExceptions = {ResourceNotFoundException.class, ResourceGoneException.class})
     public String postMessage(@RequestBody MessageDetails messageDetails) {
-        LOGGER.info("Received request to post a message to {} with payload {} ", messageDetails.getEmail(), messageDetails.getPayload());
+        LOGGER.info("Received request to post a message to {} with payload {} ", messageDetails.getMobileNo(), messageDetails.getPayload());
           return notificationService.postMessage(messageDetails);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ApiOperation(
             value = "get messages of a recipient",
-            notes = "provide a valid email address.")
+            notes = "provide a valid mobileNo address.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "details recived"),
             @ApiResponse(code = 400, message = "Invalid request")
@@ -56,7 +56,7 @@ public class NotificationController  {
     @ResponseStatus(HttpStatus.FOUND)
     //Todo : hystrix config file
    public List<MessageDetails> getMessages(@RequestBody MessageDetails messageDetails) {
-        LOGGER.info("Received request to get messages of {} ", messageDetails.getEmail());
+        LOGGER.info("Received request to get messages of {} ", messageDetails.getMobileNo());
         return notificationService.getMessagesForRecipient();
     }
 

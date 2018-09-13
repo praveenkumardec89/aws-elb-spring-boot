@@ -22,7 +22,7 @@ public class AmazonSMSService {
     public String publishMessage(MessageDetails messageDetails) {
         LOGGER.info("getting basic details for talent {}", messageDetails);
         //publish to an SNS topic
-        String msg = "My text published to SNS topic with email endpoint";
+        String msg = "My text published to SNS topic with mobileNo endpoint";
         //create a new SNS client and set endpoint
         AmazonSNSClient snsClient = new AmazonSNSClient(new ClasspathPropertiesFileCredentialsProvider());
         snsClient.setRegion(Region.getRegion(Regions.EU_WEST_1));

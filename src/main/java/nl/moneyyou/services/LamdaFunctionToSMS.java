@@ -49,7 +49,7 @@ public class LamdaFunctionToSMS implements RequestHandler<MessageDetails, Messag
                 .withCredentials(awsCredentialsProvider).build();
        // MessageDetails messageDetails = (MessageDetails)input;
         String message = messageDetails.getPayload();
-        String phoneNumber = messageDetails.getEmail();
+        String phoneNumber = messageDetails.getMobileNo();
         sendSMSMessage(snsClient, message, phoneNumber, setSmsAttributes());
         return messageDetails;
     }

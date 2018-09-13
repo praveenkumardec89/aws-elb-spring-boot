@@ -18,5 +18,6 @@ public class MessageDetails {
     private String messageId;
 
     private String payload;
+    private String mobileNo;
     private String email;
 }

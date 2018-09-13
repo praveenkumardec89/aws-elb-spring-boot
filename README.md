@@ -1,7 +1,7 @@
 # Goal
 Requirements
 * Create an API to post a message which can be delivered to a recipient via
-sms/email and keep a record of it
+sms/mobileNo and keep a record of it
 * Create an API to retrieve the messages sent to a particular recipient
 
 AWS Services used
