@@ -1,0 +1,123 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.6.RELEASE'
+        classpath 'org.codehaus.groovy:groovy-backports-compat23:2.3.5'
+        classpath 'io.jsonwebtoken:jjwt:0.6.0'
+        classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.2'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'war'
+    id 'maven-publish'
+    id 'idea'
+    id 'io.franzbecker.gradle-lombok' version '1.6'
+    id 'io.spring.dependency-management' version '0.6.0.RELEASE'
+}
+
+apply plugin: 'org.springframework.boot'
+apply plugin: "jacoco"
+apply plugin: 'java'
+
+group 'money-you'
+version '1.0-SNAPSHOT'
+
+
+sourceCompatibility = 1.8
+
+
+repositories {
+    mavenCentral()
+}
+dependencies {
+    def spockVersion = '1.1-groovy-2.4'
+    def axonVersion = '3.0.7'
+    def mongoDriver = '3.4.2'
+    def ehcacheVersion='2.10.3'
+    def embedMongoVersion = '1.50.2'
+    def springfoxVersion = '2.6.1'
+    def jsonSchemaVersion = '1.2.0'
+    def hystrixVersion = '1.5.5'
+    def ff4jVersion = '1.7.1'
+
+   // compile 'org.projectlombok:lombok:1.16.18'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
+    compile group: 'commons-io', name: 'commons-io', version: '2.5'
+
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    compile ('com.fasterxml.jackson.datatype:jackson-datatype-json-org:2.4.0'){
+        exclude group : "org.apache.geronimo.bundles"
+    }
+    compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '3.2.2'
+    compile ("org.springframework.boot:spring-boot-starter-web")
+    compile ("org.springframework.boot:spring-boot-starter-amqp")
+    compile ("org.springframework.boot:spring-boot-starter-cache")
+    compile ("com.netflix.hystrix:hystrix-javanica:${hystrixVersion}")
+    compile ("com.netflix.hystrix:hystrix-metrics-event-stream:${hystrixVersion}")
+    compileOnly ('javax.servlet:servlet-api:2.5')
+    compile ("org.springframework.cloud:spring-cloud-starter-hystrix:1.0.3.RELEASE") {
+        exclude group: "com.netflix.archaius"
+    }
+    compile ("com.netflix.archaius:archaius-core:0.7.1")
+    compile "org.springframework.cloud:spring-cloud-context:1.1.8.RELEASE"
+    compile "io.springfox:springfox-swagger2:${springfoxVersion}"
+    compile "io.springfox:springfox-swagger-ui:${springfoxVersion}"
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+
+    //   compile 'org.codehaus.groovy:groovy-all:2.3.11'
+    //   testCompile group: 'junit', name: 'junit', version: '4.12'
+    //compileOnly "org.projectlombok:lombok:1.16.20"
+    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '1.9.5'
+
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.1.0")
+    testRuntime(
+            'org.junit.jupiter:junit-jupiter-engine:5.1.0',
+            'org.junit.vintage:junit-vintage-engine:5.1.0',
+            'org.junit.platform:junit-platform-launcher:1.1.0',
+            'org.junit.platform:junit-platform-runner:1.1.0'
+    )
+    testCompile "org.spockframework:spock-core:${spockVersion}"
+    //   testCompile "org.spockframework:spock-spring:${spockVersion}"
+    // optional dependencies for using Spock
+    // only necessary if Hamcrest matchers are used
+    testRuntime "net.bytebuddy:byte-buddy:1.6.5"          // allows mocking of classes (in addition to interfaces)
+    testRuntime "org.objenesis:objenesis:2.5.1"
+
+}
+
+test {
+    dependsOn 'cleanTest'
+    // show standard out and standard error of the test JVM(s) on the console
+    testLogging {
+        showStandardStreams = true
+        displayGranularity = 2
+        exceptionFormat = 'full'
+        events 'started', 'passed'
+    }
+
+    springBoot {
+        mainClass = 'nl.moneyyou.Moneyyou'
+    }
+
+    bootRun {
+        systemProperty "spring.profiles.active", "swagger"
+    }
+
+    bootRepackage {
+        classifier = 'executable'
+    }
+
+
+
+
+}
