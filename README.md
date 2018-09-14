@@ -6,6 +6,7 @@ sms/mobileNo and keep a record of it
 
 AWS Services used
 ===============
+* Cloud Formation Scripts
 * Elastic bean stack
 * ELB
 * EC2
