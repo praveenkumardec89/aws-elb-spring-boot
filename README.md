@@ -20,17 +20,17 @@ AWS Services used
 
 Design Approach
 ---------------
-I haven't used CloudFront, API Gateway, VPC as in this scenario I dont need them and other than ELB these are the only tools to face the Internet from the env.
+I haven't used CloudFront, API Gateway, VPC as in this scenario I don't need them and other than ELB these are the only tools to face the Internet from the env.
 
-* deployed the Spring-Boot APis on elastic bean stack
-* bean stalk uses the EC2 auto scaling group
-* these instances are registered with the elastic load balancer
-* ELB is the tool which faces the internet, so configure the inbound rules to allow the traffic on 
+* deployed the Spring-Boot APIs on EBS
+* EBS uses the EC2 auto scaling group
+* these instances are registered with the ELB
+* ELB is public facing in this scenario, so configured the inbound rules to allow the traffic on 
 the port spring app is listening.
-* postMessage API , pubishes the received request using SNS with the topic to SQS
-* SQS has two queus on subscribed to send the message to the recipient , another queue subscribed to store the message into a db
+* postMessage API , publishes the payload of request using SNS with a topic
+* SQS subscribed to the above topic with two queues.
 * one Lambda function will listen to each of these Queues and send the message to the recipient and store in the DB respectively.
-* Get Method is straight forward where API , directly returns the results from DB.
+* Get Method is straight forward where API , directly returns the results from DynamoDB.
 
 This APP is already deployed on Amazon Cloud, Ireland AZs.
  
@@ -43,4 +43,4 @@ goto : http://money-you.eu-west-1.elasticbeanstalk.com/swagger-ui.html#
 
 Not Done Yet.
 ------------
-* Havent completely written the Unit test because of the limited time.
+* Haven't completely written the Unit test because of the limited time.
