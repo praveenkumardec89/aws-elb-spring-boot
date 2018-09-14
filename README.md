@@ -16,6 +16,7 @@ AWS Services used
 * SQS
 * SNS
 * Sprint- Boot, Java 8, Gradle 
+* DynamoDB
 
 Design Approach
 ---------------
